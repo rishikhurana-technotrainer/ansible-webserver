@@ -26,6 +26,9 @@ pipeline {
 		}
 		stage('Run ansible-lint against playbooks') {
 			steps {
+   				echo "$NODE_NAME"
+  				sh 'ls -la /etc/ansible/roles'
+				
 				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint apache-install.yml'
 				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint website-update.yml'
 				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint website-test.yml'
