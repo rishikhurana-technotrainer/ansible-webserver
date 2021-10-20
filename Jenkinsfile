@@ -1,5 +1,9 @@
 pipeline {
 	agent { label "agentfarm" }
+	environment {
+		KEY_FILE = '/home/ubuntu/.ssh/vm-instance-key.pem'
+		USER = 'ubuntu'
+	}
 	stages {
 		stage('Delete the workspace') {
 			steps {
@@ -35,5 +39,29 @@ pipeline {
 				
 			}
 		}
+		stage('install apache update') {
+			steps {
+				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/apache-install.yml'
+				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
+			}
+				
+		}
+		stage('Test website') {
+			steps {
+				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-test.yml'
+			}
+		}
+	}
+	post {
+		stage('Send Slack Notification') {
+            steps {
+                slackSend color: 'warning', message: "Mr Eddie: Please approve ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.JOB_URL} | Open>)"
+            }
+        }
+        stage('Request Input') {
+            steps {
+                input 'Please approve or deny'
+            }
+        }
 	}
 }
