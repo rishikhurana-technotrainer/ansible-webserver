@@ -41,14 +41,14 @@ pipeline {
 		}
 		stage('install apache update') {
 			steps {
-				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/apache-install.yml'
-				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
+				//sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/apache-install.yml'
+				//sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
 				
 			}
 		}
 		stage('Test website') {
 			steps {
-				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
+				//sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
 			}
 		}
 		stage('Send Slack Notification') {
@@ -64,14 +64,10 @@ pipeline {
 	}
 	post {
 		success {
-			steps {
 				slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} was successful!"
-			}
 		}
 		failure {
-			steps {
 				slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} failed."
-			}
 		}
 	}
 	
