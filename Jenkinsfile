@@ -43,16 +43,14 @@ pipeline {
 			steps {
 				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/apache-install.yml'
 				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
-			}
 				
+			}
 		}
 		stage('Test website') {
 			steps {
-				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-test.yml'
+				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
 			}
 		}
-	}
-	post {
 		stage('Send Slack Notification') {
             steps {
                 slackSend color: 'warning', message: "Mr Eddie: Please approve ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.JOB_URL} | Open>)"
@@ -63,5 +61,13 @@ pipeline {
                 input 'Please approve or deny'
             }
         }
+	}
+	post {
+		success {
+			slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} was successful! :)"
+		}
+		failure {
+			slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} failed. :("
+		}
 	}
 }
