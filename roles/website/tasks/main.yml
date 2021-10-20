@@ -1,0 +1,37 @@
+---
+- name: Set the index path
+  set_fact:
+    file_path: /var/www/html
+
+- name: Copy vars.html
+  copy:
+    src: vars.html
+    dest: "{{ file_path }}/vars.html"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Add a link
+  lineinfile:
+    path: "{{ file_path }}/index.html"
+    line: <a href=vars.html>Ansible Variables Page</a>
+    insertafter: EOF
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Insert hostname from ansible facts
+  lineinfile:
+    path: "{{ file_path }}/vars.html"
+    line: <p>My name is {{ ansible_hostname }}.</p>
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Add a link
+  lineinfile:
+    path: "{{ file_path }}/vars.html"
+    line: <a href=index.html>Back to index.html</a>
+    insertafter: EOF
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Gather facts on a file
+  stat:
+    path: /etc/hosts
+  register: i
