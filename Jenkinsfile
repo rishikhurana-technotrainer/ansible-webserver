@@ -22,9 +22,9 @@ stages {
     }
   
   
-  stage('Third Stage') {
+  stage('Download Code ') {
 			steps {
-				echo "Third Stage"
+				git 'https://github.com/rishikhurana-technotrainer/ansible-webserver.git'
 			}
     }
   }
