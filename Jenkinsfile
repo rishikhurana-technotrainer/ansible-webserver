@@ -27,6 +27,17 @@ stages {
 				git 'https://github.com/rishikhurana-technotrainer/ansible-webserver.git'
 			}
     }
+	  stage('Running Ansible-lit against Playbook ') {
+			steps {
+				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint:4 apache-install.yml'
+				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint:4 website-update.yml'
+				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint:4 website-test.yml'
+			}
+    }
+	
+
+	
+	
   }
 
 }
