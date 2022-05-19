@@ -1,17 +1,19 @@
 pipeline {
-  agent { label "agentfarm" }
+	agent {
+		label "agentfarm"
+	}
 	environment {
 		KEY_FILE = '/home/ubuntu/.ssh/vm-instance-key.pem'
 		USER = 'ubuntu'
 	}
-stages {
+	stages {
 		stage('Delete the workspace') {
 			steps {
 				cleanWs()
 			}
-    }
-  
-  stage('Installing Ansible') {
+		}
+
+		stage('Installing Ansible') {
 			steps {
 				script {
 					def ansible_exists = fileExists '/usr/bin/ansible'
@@ -23,21 +25,21 @@ stages {
 					}
 				}
 			}
-    }
-  
-  
-  stage('Download Code ') {
+		}
+
+
+		stage('Download Code ') {
 			steps {
 				git 'https://github.com/rishikhurana-technotrainer/ansible-webserver.git'
 			}
-    }
-	  stage('Running Ansible-lit against Playbook ') {
+		}
+		stage('Running Ansible-lit against Playbook ') {
 			steps {
 				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint:4 apache-install.yml'
 				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint:4 website-update.yml'
 				sh 'docker run --rm -v $WORKSPACE/playbooks:/data cytopia/ansible-lint:4 website-test.yml'
 			}
-    }
+		}
 		stage('install apache update') {
 			steps {
 				sh 'export ANSIBLE_HOST_KEY_CHECKING=False && ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/apache-install.yml'
@@ -49,19 +51,13 @@ stages {
 				sh 'ansible-playbook -u $USER --private-key $KEY_FILE -i $WORKSPACE/host_inventory $WORKSPACE/playbooks/website-update.yml'
 			}
 		}
-	
-
-	
-	
-  }
-	
+	}
 	post {
 		success {
-				slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} was successful!"
+			slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} was successful!"
 		}
 		failure {
-				slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} failed."
+			slackSend color: 'warning', message: "Build ${env.JOB_NAME} ${env.BUILD_NUMBER} failed."
 		}
 	}
-
 }
